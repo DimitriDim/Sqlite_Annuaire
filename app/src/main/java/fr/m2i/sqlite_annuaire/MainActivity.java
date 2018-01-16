@@ -1,17 +1,17 @@
 package fr.m2i.sqlite_annuaire;
 
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -84,12 +84,13 @@ public class MainActivity extends AppCompatActivity {
 
         value.put("name", nom);
         value.put("tel", tel);
+
         if (id.equals("")) {
             insert(value);
         } else {
             update(value, id);
+            Toast.makeText(this, "La personne à été modifié", Toast.LENGTH_LONG).show();
         }
-
 
     }
 
@@ -101,9 +102,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void update(ContentValues values, String id) {
-        
-        db.update("contacts", values, "id" + "=" + id, null);
 
+        db.update("contacts", values, "id" + "=" + id, null);
         Toast.makeText(this, "Modification ok", Toast.LENGTH_LONG).show();
 
     }
@@ -111,9 +111,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void delete(View v) {
 
-        String id = etId.getText().toString();
-        db.delete("contacts", "id" + "=" + id, null);
-        Toast.makeText(this, "Suppréssion ok", Toast.LENGTH_LONG).show();
+        Activity act = this;
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        builder.setMessage("Voulez-vous supprimer ce fichier ?");
+        builder.setPositiveButton("Oui je veux supprimer " + etSearch.getText().toString(), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String id = etId.getText().toString();
+                db.delete("contacts", "id" + "=" + id, null);
+                //Toast.makeText(this, "Suppréssion ok", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        builder.setNegativeButton("NON", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show(); // ne retourne pas le choix de l'utilisateur
+        // arrivé à la ligne suivante, l'utilisateur n'a peut être pas encore répondu à la question (car appel asynchrone)
+
 
     }
 
